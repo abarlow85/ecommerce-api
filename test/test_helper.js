@@ -3,47 +3,76 @@ const request = require('supertest');
 const app = require('../server/app');
 const mongoose = require('mongoose');
 const Product = mongoose.model('product');
+const Category = mongoose.model('product_category');
+
+
+let categoryOne;
+let categoryTwo;
+let categoryThree;
+
+
+const populateCategories = done => {
+  categoryOne = new Category({
+    name: 'Cat One'
+  });
+  categoryTwo = new Category({
+    name: 'Cat Two'
+  });
+  categoryThree = new Category({
+    name: 'Cat Three'
+  });
+
+
+  Category.remove({})
+    .then(() => {
+      return Promise.all([categoryOne.save(), categoryTwo.save(), categoryThree.save()]);
+    })
+    .then((res) => {
+      done();
+    })
+    .catch(err => done(err));
+
+
+
+};
 
 const populateProducts = done => {
-
   const productOne = new Product({
     name: 'One',
     description: 'One',
-    price: '19.64'
+    price: '19.64',
+    category: categoryOne
   });
   const productTwo = new Product({
     name: 'Two',
     description: 'Two',
-    price: '9.00'
+    price: '9.00',
+    category: categoryTwo
   });
   const productThree = new Product({
     name: 'Three',
     description: 'Three',
-    price: '199'
+    price: '199',
+    category: categoryThree
   });
-
   Product.remove({})
     .then(() => {
       return Promise.all([productOne.save(), productTwo.save(), productThree.save()]);
     })
     .then(() => done())
     .catch(err => {
-      console.log(err);
+      // console.log(err);
       done(err);
     });
 };
 
-
-//
-// beforeEach((done) => {
-//   Product.remove({})
-//     .then()
-// });
 
 module.exports = {
   expect,
   request,
   app,
   Product,
-  populateProducts
+  Category,
+  populateProducts,
+  populateCategories
 };

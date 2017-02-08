@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const validator = require('validator');
+const { ProductCategorySchema } = require('./productCategory');
 
 const ProductSchema = new Schema({
   name: {
@@ -24,11 +25,15 @@ const ProductSchema = new Schema({
       validator: validatePrice,
       message: 'Price entered is not valid currency'
     }
+  },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: 'product_category',
+    required: true
   }
-});
+}, {timestamps: {}});
 
 function validatePrice(price, next) {
-
   if (!validator.isCurrency(''+price, {allow_negatives: false})) {
     next(false);
   } else {
@@ -37,17 +42,43 @@ function validatePrice(price, next) {
 
 }
 
+function convertPrice(price) {
+
+  let priceStr = ''+price;
+
+  if (priceStr.includes('.')) {
+    price = priceStr.split('.');
+
+    if (price.length > 2) return priceStr;
+
+    price = price.join('');
+  } else {
+    price *= 100;
+  }
+
+  return price;
+}
+
 ProductSchema.pre('save', function(next){
   const product = this;
 
-  const price = ''+product.price;
+  product.price = convertPrice(product.price);
 
-  if (price.includes('.')) {
-    product.price = price.split('.').join('');
-  } else {
-    product.price *= 100;
-  }
+  next();
+});
 
+ProductSchema.pre('findOneAndUpdate', function(next){
+  validatePrice(this._update.price, valid => {
+    if (!valid) {
+      return next(valid);
+    }
+    this._update.price = convertPrice(this._update.price);
+    next();
+  });
+});
+
+ProductSchema.pre('find', function(next) {
+  this.populate('category');
   next();
 });
 

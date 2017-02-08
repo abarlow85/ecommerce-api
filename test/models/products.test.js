@@ -1,13 +1,24 @@
-const {expect, request, app, Product, populateProducts} = require('../test_helper');
+const {expect, request, app, Product, Category, populateProducts, populateCategories} = require('../test_helper');
 
-beforeEach(populateProducts);
+before(populateCategories);
+before(populateProducts);
 
 describe('Product Model Validation', () => {
+  let category;
+  before(done => {
+    Category.findOne({name: 'cat one'})
+    .then(result => {
+      category = result;
+      done();
+    });
+  });
+
   it('fails when name is invalid', (done) => {
     Product.create({
       name: 'a',
       description: 'Valid Desc',
-      price: '19.99'
+      price: '19.99',
+      category
     }).then(product => {
       done(product);
     }).catch(err => {
@@ -18,7 +29,8 @@ describe('Product Model Validation', () => {
     Product.create({
       name: 'Valid Name',
       description: 'a',
-      price: '19999'
+      price: '19999',
+      category
     }).then(product => {
       done(product);
     }).catch(err => {
@@ -29,7 +41,8 @@ describe('Product Model Validation', () => {
     Product.create({
       name: 'Valid Name',
       description: 'Valid Desc',
-      price: '19.999'
+      price: '19.999',
+      category
     }).then(product => {
       done(product);
     }).catch(err => {
@@ -41,17 +54,20 @@ describe('Product Model Validation', () => {
     const productOne = new Product({
       name: 'One',
       description: 'One',
-      price: '19.64'
+      price: '19.64',
+      category
     });
     const productTwo = new Product({
       name: 'Two',
       description: 'Two',
-      price: '9.00'
+      price: '9.00',
+      category
     });
     const productThree = new Product({
       name: 'Three',
       description: 'Three',
-      price: '199'
+      price: '199',
+      category
     });
 
     Promise.all([productOne.save(), productTwo.save(), productThree.save()])

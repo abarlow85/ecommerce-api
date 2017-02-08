@@ -1,6 +1,13 @@
-const {expect, request, app, Product, populateProducts} = require('../../test_helper');
+const {expect, request, app, Product, Category} = require('../../test_helper');
 
-beforeEach(populateProducts);
+let category;
+before(done => {
+  Category.findOne({name: 'cat one'})
+  .then(result => {
+    category = result;
+    done();
+  });
+});
 
 describe('Admin Product routes', () => {
 
@@ -8,8 +15,11 @@ describe('Admin Product routes', () => {
     request(app)
       .get('/admin/products')
       .end((err, response) => {
-        expect(response.body.length).toBe(3);
-        done();
+        Product.count()
+          .then(count => {
+            expect(response.body.length).toBe(count);
+            done();
+          });
       });
   });
 
@@ -18,9 +28,9 @@ describe('Admin Product routes', () => {
     const body = {
       name: 'Test Product',
       description: 'A great test',
-      price: '19.99'
+      price: '19.99',
+      category
     };
-
     request(app)
       .post('/admin/products')
       .send(body)
@@ -51,12 +61,14 @@ describe('Admin Product routes', () => {
 });
 
 describe('Admin Products ID', () => {
-  it('GET to /admin/products/:id find a product', done => {
+
+  it('GET to /admin/products/:id finds a product', done => {
 
     Product.create({
       name: 'Test Product',
       description: 'A great test',
-      price: '19.99'
+      price: '19.99',
+      category
     })
     .then(product  => {
       request(app)
@@ -75,4 +87,58 @@ describe('Admin Products ID', () => {
     }).catch(err => done(err));
 
   });
+
+  it('GET to /admin/products/:id DOES NOT find a product', done => {
+
+    request(app)
+      .get(`/admin/products/123123123123`)
+      .expect(404)
+      .end((err, response) => {
+        if (err) return done(err);
+        done();
+      });
+
+  });
+
+  it('PUT to /admin/products/:id updates a product', done => {
+    Product.findOne({name: 'One'})
+      .then(product => {
+        const body = {
+          name: 'Updated One',
+          description: 'Updated One',
+          price: '88.88',
+          category
+        };
+        request(app)
+          .put(`/admin/products/${product._id}`)
+          .send(body)
+          .end((err, response) => {
+            if (err) return done(err);
+            expect(response.body).toInclude({ name: body.name, description: body.description, price:8888 });
+            done();
+          });
+
+      });
+  });
+
+  it('DELETE to /admin/products/:id removes a product', done => {
+    Product.findOne({name: 'One'})
+      .then(product => {
+        request(app)
+          .delete(`/admin/products/${product._id}`)
+          .expect(response => {
+            expect(response.body).toInclude({name: 'One'});
+          })
+          .end((err, response) => {
+            if (err) done(err);
+            Product.findOne({name:'One'})
+              .then(response => {
+                expect(response).toNotExist();
+                done();
+              }).catch(err => done(err));
+          });
+      }).catch(err => done(err));
+
+  });
+
 });
