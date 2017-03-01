@@ -13,10 +13,10 @@ const errorHandler = (err, req, res, next) => {
       errors[err.path] = `${err.path} entered is invalid (numbers or . only)`;
       return res.status(422).send({errors});
     }
-
     res.status(422).send(err);
 
   } finally {
+    console.log(err);
     next();
   }
 

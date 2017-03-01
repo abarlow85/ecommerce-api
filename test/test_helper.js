@@ -4,11 +4,40 @@ const app = require('../server/app');
 const mongoose = require('mongoose');
 const Product = mongoose.model('product');
 const Category = mongoose.model('product_category');
+const History = mongoose.model('history');
+const User = mongoose.model('user');
 
 
 let categoryOne;
 let categoryTwo;
 let categoryThree;
+const users = {};
+
+const createUser = done => {
+  const admin = new User({
+    email: 'admin@admin.com',
+    password: 'password',
+    is_superuser: 'true'
+  });
+  const regular = new User({
+    email: 'regular@regular.com',
+    password: 'password',
+  });
+
+  User.remove({})
+  .then(() => {
+    return Promise.all([admin.save(), regular.save()]);
+  })
+  .then(res => {
+    return Promise.all([res[0].generateAuthToken(), res[1].generateAuthToken()]);
+  })
+  .then(([admin, regular]) => {
+    users.admin = admin.user;
+    users.regular = regular.user;
+    done();
+  })
+  .catch(err => done(err));
+};
 
 
 const populateCategories = done => {
@@ -22,15 +51,17 @@ const populateCategories = done => {
     name: 'Cat Three'
   });
 
-
-  Category.remove({})
-    .then(() => {
-      return Promise.all([categoryOne.save(), categoryTwo.save(), categoryThree.save()]);
-    })
-    .then((res) => {
-      done();
-    })
-    .catch(err => done(err));
+  History.remove({})
+  .then(() => {
+    return Category.remove({});
+  })
+  .then(() => {
+    return Promise.all([categoryOne.save(), categoryTwo.save(), categoryThree.save()]);
+  })
+  .then((res) => {
+    done();
+  })
+  .catch(err => done(err));
 
 
 
@@ -61,7 +92,6 @@ const populateProducts = done => {
     })
     .then(() => done())
     .catch(err => {
-      // console.log(err);
       done(err);
     });
 };
@@ -73,6 +103,10 @@ module.exports = {
   app,
   Product,
   Category,
+  History,
+  User,
+  users,
   populateProducts,
-  populateCategories
+  populateCategories,
+  createUser
 };

@@ -1,0 +1,115 @@
+const ModelForm = require('../db/forms/form');
+const mongoose = require('mongoose');
+const _ = require('lodash');
+const History = mongoose.model('history');
+
+const collections = {};
+Object.keys(mongoose.models)
+.forEach(model => {
+  if (model !== 'user' || model !== 'history') {
+    collections[model] = mongoose.models[model];
+  }
+});
+
+function getSchema({collection}) {
+  return collections[collection];
+}
+
+class CollectionsController {
+
+  index(req, res, next) {
+    const Schema = getSchema(req.params);
+    const form = new ModelForm(Schema.schema);
+    Schema.find({})
+      .then(documents => {
+        setTimeout(() => {
+          res.send({
+            form: form.form,
+            documents,
+            names: {
+              single: Schema.modelName.split('_').join(' '),
+              plural: Schema.collection.collectionName.split('_').join(' ')
+            }
+          });
+        });
+      })
+      .catch(err => next(err));
+  }
+
+  create(req, res, next) {
+    const Schema = getSchema(req.params);
+    Schema.create(req.body)
+      .then((newDoc) => {
+        Schema.find({})
+        .then(documents => res.send({documents, document:newDoc}));
+      }).catch(err => next(err));
+  }
+
+  update(req, res, next) {
+    const Schema = getSchema(req.params);
+    const _id = req.params.id;
+    Schema.findOne({_id})
+    .then(doc => {
+      _.merge(doc, req.body);
+      return doc.save();
+    })
+    .then(newDoc => {
+      Schema.find({})
+      .then(documents => {
+        res.send({documents, document:newDoc});
+      });
+    })
+    .catch(err => next(err));
+  }
+
+  getRelated(req, res, next) {
+    const Schema = getSchema(req.params);
+    Schema.getRelated(req.params.id)
+    .then(results => {
+      res.send(results);
+    })
+    .catch(err => next(err));
+
+  }
+
+  getOne(req, res) {
+    const Schema = getSchema(req.params);
+    const _id = req.params.id;
+
+    Schema.findById(_id)
+      .then(document => {
+        if (!document) {
+          return Promise.reject();
+        }
+        return History.find({
+          'doc.data._id': document._id
+        });
+
+      })
+      .then(docHistory => {
+        res.send(docHistory);
+      })
+      .catch(err => res.status(404).send({}));
+  }
+
+  remove(req, res) {
+    const Schema = getSchema(req.params);
+    const _id = req.params.id;
+    Schema.findOne({_id})
+      .then(document => {
+        if (!document) {
+          return Promise.reject();
+        }
+        return document.remove();
+      }).then(document => {
+        res.send(document);
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(404).send({});
+      });
+  }
+
+}
+
+module.exports = new CollectionsController();

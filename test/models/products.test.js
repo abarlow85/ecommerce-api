@@ -1,4 +1,4 @@
-const {expect, request, app, Product, Category, populateProducts, populateCategories} = require('../test_helper');
+const {expect, request, app, Product, Category, History, populateProducts, populateCategories} = require('../test_helper');
 
 before(populateCategories);
 before(populateProducts);
@@ -17,7 +17,7 @@ describe('Product Model Validation', () => {
     Product.create({
       name: 'a',
       description: 'Valid Desc',
-      price: '19.99',
+      price: '19',
       category
     }).then(product => {
       done(product);
@@ -41,7 +41,7 @@ describe('Product Model Validation', () => {
     Product.create({
       name: 'Valid Name',
       description: 'Valid Desc',
-      price: '19.999',
+      price: '0.99',
       category
     }).then(product => {
       done(product);
@@ -50,7 +50,7 @@ describe('Product Model Validation', () => {
     });
   });
 
-  it('saves price in cents', done => {
+  it('saves price in whole dollars', done => {
     const productOne = new Product({
       name: 'One',
       description: 'One',
@@ -75,13 +75,13 @@ describe('Product Model Validation', () => {
         products.forEach(product => {
           switch (product.name) {
             case 'One':
-              expect(product.price).toEqual(1964);
+              expect(product.price).toEqual(19);
               break;
             case 'Two':
-              expect(product.price).toEqual(900);
+              expect(product.price).toEqual(9);
               break;
             case 'Three':
-              expect(product.price).toEqual(19900);
+              expect(product.price).toEqual(199);
           }
         });
         done();

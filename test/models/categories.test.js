@@ -11,11 +11,11 @@ describe('Category Model Validation', () => {
       done();
     });
   });
-  it('adds displayName in Title Case', done => {
+  it('converts name to lowercase on save', done => {
     Category.create({
       name: 'a tEsT CaSE'
     }).then(category => {
-      expect(category.displayName).toBe('A Test Case');
+      expect(category.name).toBe('a test case');
       done();
     }).catch(err => done(err));
   });

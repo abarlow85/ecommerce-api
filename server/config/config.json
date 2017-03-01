@@ -1,10 +1,12 @@
 {
   "test": {
-    "PORT": 3000,
-    "MONGODB_URI": "mongodb://localhost:27017/ecommerceAdminTest"
+    "PORT": 8080,
+    "MONGODB_URI": "mongodb://localhost:27017/ecommerceAdminTest",
+    "JWT_SECRET" : "asdfasdfasdfasdfweqrafsdgfdsweqr"
   },
   "development": {
-    "PORT": 3000,
-    "MONGODB_URI": "mongodb://localhost:27017/ecommerceAdmin"
+    "PORT": 8080,
+    "MONGODB_URI": "mongodb://localhost:27017/ecommerceAdmin",
+    "JWT_SECRET" : "jklasdfiouwerjklasfdiou"
   }
 }

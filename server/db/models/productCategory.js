@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
 const Schema = mongoose.Schema;
 
 const ProductCategorySchema = new Schema({
@@ -10,39 +11,66 @@ const ProductCategorySchema = new Schema({
     lowercase: true,
     trim: true
   },
-  displayName: {
-    type: String,
-    required: true
-  }
 }, {timestamps:{}});
 
-ProductCategorySchema.pre('validate', function(next){
-  const category = this;
-  if (!category.name) return next();
-  category.displayName = toTitleCase(category.name);
-  next();
+ProductCategorySchema.plugin(uniqueValidator, {message: 'category already exists ({PATH} must be unique)'});
 
-});
-
-ProductCategorySchema.pre('findOneAndUpdate', function(next){
-  const category = this;
-  if (!category._update.name) return next();
-
-  category._update.displayName = toTitleCase(category._update.name);
-
-  next();
-
-});
-
-function toTitleCase(string) {
-  return string.replace(/\w\S*/g, (txt) => {
-    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+ProductCategorySchema.statics.getRelated = function(_id) {
+  const Product = mongoose.model('product');
+  return new Promise((resolve, reject) => {
+    const names = {
+      single: 'product',
+      plural: 'products'
+    };
+    Product.find({category: _id})
+    .then(documents => {
+      if (documents.length === 0) {
+        resolve({});
+      } else {
+        const results = {
+          products: {
+            documents,
+            names
+          }
+        };
+        resolve(results);
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      reject(err);
+    });
   });
-}
+};
+
+ProductCategorySchema.pre('save', require('../hooks/preSave'));
+
+ProductCategorySchema.post('save', function(doc) {
+  require('../hooks/postSave')(doc, 'product_category');
+});
+
+ProductCategorySchema.pre('remove', function(next) {
+  const category = this;
+  const Product = mongoose.model('product');
+  const {_id} = category;
+  Product.find({category: _id})
+  .then(products => {
+    const promises = products.map(product => {
+      return product.remove();
+    });
+    Promise.all(promises).then(() => {
+      next();
+    });
+  }).catch(err => {
+    console.log(err);
+    next(err);
+  });
+});
+
+ProductCategorySchema.post('remove', function(doc) {
+  require('../hooks/postRemove')(doc, 'product_category');
+});
 
 const ProductCategory = mongoose.model('product_category', ProductCategorySchema);
 
-module.exports = {
-  ProductCategory,
-  ProductCategorySchema
-};
+module.exports = ProductCategory;

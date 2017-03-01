@@ -1,44 +1,68 @@
-const {expect, request, app, Category} = require('../../test_helper');
+const {expect, request, app, users, Category} = require('../../test_helper');
 
 describe('Admin Category routes', () => {
-
-  it('GET /admin/categories responds with categories', (done) => {
-    request(app)
-      .get('/admin/categories')
-      .end((err, response) => {
-        if (err) return done(err);
-        Category.count()
-          .then(count => {
-            expect(response.body.length).toBe(count);
-            done();
-          }).catch(err => done(err));
-      });
+  let token;
+  beforeEach(() => {
+    token = users.admin.tokens[0].token;
   });
 
-  it('POST to /admin/categories saves a new category', done => {
-    const body = {
-      name: 'a new cat'
-    };
-
+  it('invalid auth to GET /admin/product_category responds with status 401', done => {
     request(app)
-      .post('/admin/categories')
-      .send(body)
-      .end((err, response) => {
+      .get('/admin/product_category')
+      .set('x-auth', users.regular.tokens[0].token)
+      .expect(401)
+      .end((err, {body}) => {
         if (err) return done(err);
-        expect(response.body.name).toBe(body.name);
         done();
       });
   });
 
-  it('POST to /admin/categories DOES NOT save a new product with invalid data', done => {
+  it('GET /admin/product_category responds with categories', (done) => {
     request(app)
-      .post('/admin/categories')
+      .get('/admin/product_category')
+      .set('x-auth', token)
+      .expect(200)
+      .end((err, {body}) => {
+        if (err) return done(err);
+        expect(body.form.length).toBe(1);
+        expect(body.documents[0]).toIncludeKeys(['_id', 'name']);
+        expect(body.documents[0]).toExcludeKeys(['price']);
+        expect(body.names.single).toBe('product category');
+        expect(body.names.plural).toBe('product categories');
+        done();
+      });
+  });
+
+  it('POST to /admin/productcategories saves a new category', done => {
+    const data = {
+      name: 'a new cat'
+    };
+
+    request(app)
+      .post('/admin/product_category')
+      .set('x-auth', token)
+      .send(data)
+      .expect(200)
+      .end((err, {body}) => {
+        if (err) return done(err);
+        expect(body.documents[0]).toIncludeKeys(['_id', 'name']);
+        expect(body.documents[0]).toExcludeKeys(['price']);
+        expect(body.document).toInclude({name: data.name});
+        done();
+      });
+  });
+
+  it('POST to /admin/productcategories DOES NOT save a new product with invalid data', done => {
+    request(app)
+      .post('/admin/product_category')
+      .set('x-auth', token)
       .send({name: 'a'})
       .expect(422)
-      .end((err, response) => {
+      .end((err, {body}) => {
         Category.findOne({name: 'a'})
           .then(product => {
             expect(product).toNotExist();
+            expect(body.errors).toIncludeKey('name');
             done();
           }).catch(err => done(err));
       });
@@ -48,6 +72,10 @@ describe('Admin Category routes', () => {
 
 describe('Admin Categories ID', () => {
   let category;
+  let token;
+  beforeEach(() => {
+    token = users.admin.tokens[0].token;
+  });
 
   beforeEach(done => {
     Category.create({
@@ -64,24 +92,23 @@ describe('Admin Categories ID', () => {
       .catch(err => done(err));
   });
 
-  it('GET to /admin/categories/:id finds a category', done => {
+  it('GET to /admin/product_category/:id finds category history', done => {
     request(app)
-      .get(`/admin/categories/${category._id}`)
+      .get(`/admin/product_category/${category._id}`)
+      .set('x-auth', token)
       .expect(200)
-      .end((err, response) => {
+      .end((err, {body}) => {
         if (err) return done(err);
-        expect(response.body).toInclude({
-          name: 'another category',
-          displayName: 'Another Category'
-        });
+        expect(body[0]).toInclude({action: 'added', doc: {data: {name: 'another category'}}});
         done();
       });
   });
-  
-  it('GET to /admin/categories/:id DOES NOT find a product', done => {
+
+  it('GET to /admin/product_category/:id with invalid :id DOES NOT responds with 404', done => {
 
     request(app)
-      .get(`/admin/categories/12312312123`)
+      .get(`/admin/product_category/12312312123`)
+      .set('x-auth', token)
       .expect(404)
       .end((err, response) => {
         if (err) return done(err);
@@ -90,26 +117,28 @@ describe('Admin Categories ID', () => {
 
   });
 
-  it('PUT to /admin/categories/:id updates a product', done => {
-    category.name = 'Updated name';
+  it('PUT to /admin/product_category/:id updates a category', done => {
+    category.name = 'updated name';
     request(app)
-      .put(`/admin/categories/${category._id}`)
+      .put(`/admin/product_category/${category._id}`)
+      .set('x-auth', token)
       .send(category)
-      .end((err, response) => {
+      .expect(200)
+      .end((err, {body}) => {
         if (err) return done(err);
-        expect(response.body).toInclude({
-          name: 'updated name',
-          displayName: 'Updated Name'
-        });
+        expect(body).toIncludeKeys(['documents', 'document']);
+        expect(body.document).toInclude({name: category.name});
         done();
       });
   });
 
-  it('DELETE to /admin/categories/:id removes a product', done => {
+  it('DELETE to /admin/product_category/:id removes a category', done => {
     request(app)
-      .delete(`/admin/categories/${category._id}`)
-      .expect(response => {
-        expect(response.body).toInclude({name: 'another category'});
+      .delete(`/admin/product_category/${category._id}`)
+      .set('x-auth', token)
+      .expect(200)
+      .expect(({body}) => {
+        expect(body).toInclude({name: 'another category'});
       })
       .end((err, respone) => {
         if (err) return done(err);
