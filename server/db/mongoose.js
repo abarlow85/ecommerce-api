@@ -4,6 +4,7 @@ const util = require('util');
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGODB_URI);
 
+// custom type for dynamic form creation
 function Url(key, options) {
   mongoose.SchemaType.call(this, key, options, 'Url');
 }
@@ -12,11 +13,13 @@ Url.prototype.cast = val => {
   return val;
 };
 
+//custom type for dynamic form creation
 function Currency(path, options) {
     mongoose.SchemaType.call(this, path, options, 'Currency');
 }
 util.inherits(Currency, mongoose.SchemaTypes.Number);
 Currency.prototype.cast = val => {
+  // parseInt for whole dollars
   return Number(parseInt(val));
 };
 

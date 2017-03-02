@@ -33,7 +33,7 @@ const ProductSchema = new Schema({
     type: Schema.Types.Url,
     validate: {
       validator: validateUrl,
-      message: 'Not a valid url. Is http(s):// there?'
+      message: 'Not a valid url. Is http(s):// present?'
     }
   },
   category: {

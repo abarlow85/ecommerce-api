@@ -3,13 +3,7 @@ const mongoose = require('mongoose');
 const _ = require('lodash');
 const History = mongoose.model('history');
 
-const collections = {};
-Object.keys(mongoose.models)
-.forEach(model => {
-  if (model !== 'user' || model !== 'history') {
-    collections[model] = mongoose.models[model];
-  }
-});
+const {collections} = require('../app');
 
 function getSchema({collection}) {
   return collections[collection];
@@ -39,6 +33,7 @@ class CollectionsController {
   create(req, res, next) {
     const Schema = getSchema(req.params);
     const schema = new Schema(req.body);
+    // send req.user to save() for logging history
     schema.save(req.user)
       .then((newDoc) => {
         Schema.find({})
@@ -49,9 +44,11 @@ class CollectionsController {
   update(req, res, next) {
     const Schema = getSchema(req.params);
     const _id = req.params.id;
+    // findOne then save uses pre/post hooks
     Schema.findOne({_id})
     .then(doc => {
       _.merge(doc, req.body);
+      // send req.user to save() for logging history
       return doc.save(req.user);
     })
     .then(newDoc => {
@@ -101,6 +98,7 @@ class CollectionsController {
         if (!document) {
           return Promise.reject();
         }
+        // add req.user to document object for loggin history
         document.__user = req.user;
         return document.remove();
       }).then(document => {

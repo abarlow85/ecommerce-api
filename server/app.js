@@ -3,6 +3,7 @@ require('./config/config');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const _ = require('lodash');
 
 const mongoose = require('./db/mongoose');
 const errorHandler = require('./middleware/errorHandler');
@@ -28,8 +29,10 @@ app.use((req, res, next) => {
 	next();
 });
 
-// routes
+// register db models to edit in admin portal
+module.exports.collections = _.pick(mongoose.models, 'product', 'product_category');
 
+// routes
 app.use('/', require('./routes'));
 app.use('/admin', require('./routes/admin'));
 app.use('/auth', require('./routes/auth'));
@@ -42,4 +45,4 @@ app.listen(PORT, () => {
   console.log('Listening on port', PORT);
 });
 
-module.exports = app;
+module.exports.app = app;

@@ -2,13 +2,14 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const router = require('express').Router();
 const _ = require('lodash');
+
 const authenticate = require('../../middleware/authenticate');
 const History = mongoose.model('history');
+const {collections} = require('../../app');
 
 router.all('*', authenticate);
 
 router.get('/', (req, res) => {
-  const collections = _.omit(mongoose.models, 'user', 'history');
   const models = Object.keys(collections).map(model => {
     return {
       name: model.includes('_') ? model.split('_').join(' ') : model,
@@ -16,6 +17,7 @@ router.get('/', (req, res) => {
     };
   });
 
+  // don't care about updates that didn't change data
   History
   .find(
     {$or: [

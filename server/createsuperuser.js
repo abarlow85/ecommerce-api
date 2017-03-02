@@ -34,7 +34,7 @@ axios.post(SIGNUP_URL, {email, password, is_superuser: true})
     if (err.code === 'ECONNREFUSED') {
       console.log(
         `
-          \n Connection to ${SIGNUP_URL} refused.
+          \n Connection to ${SIGNUP_URL} refused.  Is this the correct URL?
           \n Make sure app server is running (npm start) in a separate terminal window.
         `
       );

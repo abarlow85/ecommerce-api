@@ -1,6 +1,6 @@
 const expect = require('expect');
 const request = require('supertest');
-const app = require('../server/app');
+const {app} = require('../server/app');
 const mongoose = require('mongoose');
 const Product = mongoose.model('product');
 const Category = mongoose.model('product_category');
