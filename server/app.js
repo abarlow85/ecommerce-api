@@ -14,7 +14,6 @@ const PORT = process.env.PORT;
 app.use(bodyParser.json());
 
 const corsOptions = {
-	origin: ['http://localhost:3000'],
 	exposedHeaders: 'x-auth'
 };
 app.use(cors(corsOptions));
