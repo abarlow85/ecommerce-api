@@ -17,7 +17,7 @@ const errorHandler = (err, req, res, next) => {
   } finally {
     console.log(err);
     next();
-  }
+  };
 
 };
 
