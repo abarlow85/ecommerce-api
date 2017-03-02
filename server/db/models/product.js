@@ -39,7 +39,7 @@ const ProductSchema = new Schema({
   category: {
     type: Schema.Types.ObjectId,
     ref: 'product_category',
-    required: [true, '{PATH} is required']
+    required: [true, '{PATH} is required. Create a product category if no options are listed']
   }
 }, {timestamps: {}});
 

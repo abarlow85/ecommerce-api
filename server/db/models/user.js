@@ -115,7 +115,6 @@ UserSchema.statics.findByCredentials = function(email, password) {
 };
 
 
-
 UserSchema.pre('save', function(next){
 
 	const user = this;

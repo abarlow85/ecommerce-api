@@ -8,7 +8,7 @@ const authenticate = (req, res, next) => {
 	User.findByToken(token)
 	.then(user => {
 		if (!user) {
-			return Promise.reject();
+			return Promise.reject({access_error: 'Access Denied'});
 		}
 		if (!user.is_superuser) {
 			return Promise.reject({access_error: 'This user does not have administrator access.'});

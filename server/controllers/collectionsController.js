@@ -2,7 +2,6 @@ const ModelForm = require('../db/forms/form');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const History = mongoose.model('history');
-
 const {collections} = require('../app');
 
 function getSchema({collection}) {
@@ -57,7 +56,9 @@ class CollectionsController {
         res.send({documents, document:newDoc});
       });
     })
-    .catch(err => next(err));
+    .catch(err => {
+      next(err)
+    });
   }
 
   getRelated(req, res, next) {

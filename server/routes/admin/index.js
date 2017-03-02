@@ -4,10 +4,11 @@ const router = require('express').Router();
 const _ = require('lodash');
 
 const authenticate = require('../../middleware/authenticate');
+const validRouteParams = require('../../middleware/routeParams');
 const History = mongoose.model('history');
 const {collections} = require('../../app');
 
-router.all('*', authenticate);
+router.all('*', authenticate, validRouteParams);
 
 router.get('/', (req, res) => {
   const models = Object.keys(collections).map(model => {
