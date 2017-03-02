@@ -1,9 +1,13 @@
-[ecommerce-api]
+ecommerce-api
 ===========
-An API built with node and express to support the administrative and content management of an ecommerce website.
+An API built with node, express, and MongoDB to support the administrative and content management of an ecommerce website.
 
 Getting Started
 -----
+
+Make sure MongoDB is running is a separate terminal window.
+
+`sudo mongod`
 
 Clone the repo and install dependencies
 
