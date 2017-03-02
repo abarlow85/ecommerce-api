@@ -1,5 +1,6 @@
-[ecommerce-api - An API built with node and express to support the administrative and content management of an ecommerce website. ](https://github.com/abarlow85/ecommerce-api)
+[ecommerce-api]
 ===========
+An API built with node and express to support the administrative and content management of an ecommerce website.
 
 Getting Started
 -----
