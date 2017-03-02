@@ -38,7 +38,8 @@ class CollectionsController {
 
   create(req, res, next) {
     const Schema = getSchema(req.params);
-    Schema.create(req.body)
+    const schema = new Schema(req.body);
+    schema.save(req.user)
       .then((newDoc) => {
         Schema.find({})
         .then(documents => res.send({documents, document:newDoc}));
@@ -51,7 +52,7 @@ class CollectionsController {
     Schema.findOne({_id})
     .then(doc => {
       _.merge(doc, req.body);
-      return doc.save();
+      return doc.save(req.user);
     })
     .then(newDoc => {
       Schema.find({})
@@ -100,6 +101,7 @@ class CollectionsController {
         if (!document) {
           return Promise.reject();
         }
+        document.__user = req.user;
         return document.remove();
       }).then(document => {
         res.send(document);

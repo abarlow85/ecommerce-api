@@ -16,14 +16,14 @@ const ProductSchema = new Schema({
     required: [true, '{PATH} is required'],
     minlength: [2, '{PATH} must be more than {MINLENGTH} characters'],
     maxlength: [255, '{PATH} must be less than {MAXLENGTH} characters'],
-    widget: {el: 'textarea'},
+    widget: {el: 'textarea'}, // custom option
     trim: true
   },
   price: {
     type: Schema.Types.Currency,
     required: [true, '{PATH} is required'],
     min: [1, '$1.00 minimum required'],
-    helpText: 'Whole numbers only',
+    helpText: 'Whole numbers only', // custom option
     validate: {
       validator: validatePrice,
       message: 'Price entered is not valid currency'
@@ -33,7 +33,7 @@ const ProductSchema = new Schema({
     type: Schema.Types.Url,
     validate: {
       validator: validateUrl,
-      message: 'Not a valid url'
+      message: 'Not a valid url. Is http(s):// there?'
     }
   },
   category: {
@@ -81,6 +81,7 @@ ProductSchema.post('remove', function(doc) {
 });
 
 ProductSchema.statics.getRelated = function(_id) {
+  // no associations
   return Promise.resolve({});
 };
 

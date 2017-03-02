@@ -31,7 +31,6 @@ fs.readdirSync(__dirname + '/models').forEach(file => {
       console.log(e);
       console.warn('Unable to require file', file);
     }
-
   }
 });
 

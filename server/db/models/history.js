@@ -13,6 +13,9 @@ const HistorySchema = new Schema({
   },
   fields: {
     type: [String]
+  },
+  user: {
+    type: Schema.Types.Mixed
   }
 });
 

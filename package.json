@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server/app.js",
+    "createsuperuser": "node server/createsuperuser.js",
     "test": "export NODE_ENV=test && mocha --recursive"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.15.3",
     "bcryptjs": "^2.4.0",
     "body-parser": "^1.16.0",
     "cors": "^2.8.1",
@@ -18,7 +20,8 @@
     "lodash": "^4.17.4",
     "mongoose": "^4.8.1",
     "mongoose-unique-validator": "^1.0.3",
-    "validator": "^6.2.1"
+    "validator": "^6.2.1",
+    "yargs": "^6.6.0"
   },
   "devDependencies": {
     "expect": "^1.20.2",

@@ -56,6 +56,7 @@ ProductCategorySchema.pre('remove', function(next) {
   Product.find({category: _id})
   .then(products => {
     const promises = products.map(product => {
+      product.__user = category.__user;
       return product.remove();
     });
     Promise.all(promises).then(() => {

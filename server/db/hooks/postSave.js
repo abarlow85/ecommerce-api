@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const History = mongoose.model('history');
 
 module.exports = function(doc, kind) {
+  const {_id, email} = doc.__user;
   History.create({
     doc: {
       kind,
@@ -9,6 +10,10 @@ module.exports = function(doc, kind) {
     },
     createdAt: doc.wasNew ? doc.createdAt : doc.updatedAt,
     action: doc.wasNew ? 'added' : 'changed',
-    fields: doc.wasNew ? undefined : doc.updatedFields
+    fields: doc.wasNew ? undefined : doc.updatedFields,
+    user: {
+      _id,
+      email
+    }
   });
 };
