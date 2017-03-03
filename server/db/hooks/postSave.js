@@ -8,7 +8,7 @@ module.exports = function(doc, kind) {
       kind,
       data: {_id: doc._id, name: doc.name}
     },
-    createdAt: doc.wasNew ? doc.createdAt : doc.updatedAt,
+    createdAt: doc.wasNew ? doc.createdAt : doc.updatedFields.length ? doc.updatedAt : Date.now(),
     action: doc.wasNew ? 'added' : 'changed',
     fields: doc.wasNew ? undefined : doc.updatedFields,
     user: {
