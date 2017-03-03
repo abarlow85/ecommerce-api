@@ -1,7 +1,7 @@
 const yargs = require('yargs');
 const axios = require('axios');
 
-const SERVER_ROOT = 'http://localhost:8080';
+const SERVER_ROOT = 'https://ab-ecommerce-api.herokuapp.com';
 const SIGNUP_URL = `${SERVER_ROOT}/auth/signup`;
 
 const argv = yargs
