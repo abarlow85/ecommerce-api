@@ -38,8 +38,6 @@ app.use('/auth', require('./routes/auth'));
 
 app.use(errorHandler);
 
-
-
 app.listen(PORT, () => {
   console.log('Listening on port', PORT);
 });
